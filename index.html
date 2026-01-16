@@ -154,6 +154,26 @@
         }
         
         input, button { touch-action: manipulation; }
+
+        .gift-card {
+            background: white;
+            border-radius: 25px;
+            padding: 1.5rem;
+            border: 1px solid rgba(85, 107, 47, 0.1);
+            transition: all 0.4s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        @media (hover: hover) {
+            .gift-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px rgba(85, 107, 47, 0.05);
+                border-color: var(--olive-main);
+            }
+        }
     </style>
 </head>
 <body class="bororo-pattern">
@@ -286,39 +306,82 @@
                 <h2 class="font-script text-5xl md:text-6xl text-[var(--olive-main)] mb-4">Mimos para nossa Cozinha</h2>
                 <p class="font-serif italic text-stone-500 mb-16 md:mb-20 text-sm md:text-base">Sua presença é nossa maior alegria. <br class="hidden md:block"> Mas se desejar nos presentear, aqui estão algumas inspirações:</p>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 md:gap-12">
-                    <!-- Item 1 -->
-                    <div class="group">
-                        <div class="aspect-square bg-white rounded-luxury bororo-border flex items-center justify-center p-8 md:p-12 transition-all duration-700 md:group-hover:shadow-2xl md:group-hover:-translate-y-4">
-                            <div class="text-center">
-                                <span class="text-3xl md:text-4xl block mb-6 transition-all">🍶</span>
-                                <h4 class="font-montserrat text-[10px] md:text-[11px] tracking-[0.2em] md:tracking-[0.3em] uppercase mb-4 text-[var(--olive-deep)]">Utensílios Cerâmicos</h4>
-                                <p class="text-stone-400 text-[10px] md:text-xs italic mb-8">Peças orgânicas e funcionais em tons terra</p>
-                                <button onclick="escolher('Cerâmicas')" class="text-[var(--olive-main)] border-b border-[var(--olive-main)] pb-1 text-[9px] md:text-[10px] uppercase tracking-widest">Selecionar</button>
-                            </div>
-                        </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
+                    <!-- Gerado via script para facilitar manutenção -->
+                    <div class="gift-card">
+                        <span class="text-2xl mb-3">🥘</span>
+                        <h4 class="font-montserrat text-[9px] tracking-widest uppercase text-[var(--olive-deep)] mb-3">Assadeiras antiaderentes</h4>
+                        <button onclick="escolher('Assadeiras antiaderentes')" class="text-[var(--olive-main)] border-b border-[var(--olive-main)] pb-1 text-[8px] uppercase tracking-widest">Selecionar</button>
                     </div>
-                    <!-- Item 2 -->
-                    <div class="group">
-                        <div class="aspect-square bg-white rounded-luxury bororo-border flex items-center justify-center p-8 md:p-12 transition-all duration-700 md:group-hover:shadow-2xl md:group-hover:-translate-y-4">
-                            <div class="text-center">
-                                <span class="text-3xl md:text-4xl block mb-6 transition-all">🧺</span>
-                                <h4 class="font-montserrat text-[10px] md:text-[11px] tracking-[0.2em] md:tracking-[0.3em] uppercase mb-4 text-[var(--olive-deep)]">Têxteis & Linho</h4>
-                                <p class="text-stone-400 text-[10px] md:text-xs italic mb-8">Toalhas e caminhos de mesa de fibra natural</p>
-                                <button onclick="escolher('Têxteis')" class="text-[var(--olive-main)] border-b border-[var(--olive-main)] pb-1 text-[9px] md:text-[10px] uppercase tracking-widest">Selecionar</button>
-                            </div>
-                        </div>
+                    <div class="gift-card">
+                        <span class="text-2xl mb-3">☕</span>
+                        <h4 class="font-montserrat text-[9px] tracking-widest uppercase text-[var(--olive-deep)] mb-3">Chaleira elétrica térmica</h4>
+                        <button onclick="escolher('Chaleira elétrica térmica')" class="text-[var(--olive-main)] border-b border-[var(--olive-main)] pb-1 text-[8px] uppercase tracking-widest">Selecionar</button>
                     </div>
-                    <!-- Item 3 -->
-                    <div class="group">
-                        <div class="aspect-square bg-white rounded-luxury bororo-border flex items-center justify-center p-8 md:p-12 transition-all duration-700 md:group-hover:shadow-2xl md:group-hover:-translate-y-4">
-                            <div class="text-center">
-                                <span class="text-3xl md:text-4xl block mb-6 transition-all">🔪</span>
-                                <h4 class="font-montserrat text-[10px] md:text-[11px] tracking-[0.2em] md:tracking-[0.3em] uppercase mb-4 text-[var(--olive-deep)]">Cutelaria & Aço</h4>
-                                <p class="text-stone-400 text-[10px] md:text-xs italic mb-8">Facas e acessórios de alta qualidade</p>
-                                <button onclick="escolher('Cutelaria')" class="text-[var(--olive-main)] border-b border-[var(--olive-main)] pb-1 text-[9px] md:text-[10px] uppercase tracking-widest">Selecionar</button>
-                            </div>
-                        </div>
+                    <div class="gift-card">
+                        <span class="text-2xl mb-3">🍝</span>
+                        <h4 class="font-montserrat text-[9px] tracking-widest uppercase text-[var(--olive-deep)] mb-3">Escorredor de macarrão</h4>
+                        <button onclick="escolher('Escorredor de macarrão')" class="text-[var(--olive-main)] border-b border-[var(--olive-main)] pb-1 text-[8px] uppercase tracking-widest">Selecionar</button>
+                    </div>
+                    <div class="gift-card">
+                        <span class="text-2xl mb-3">🍽️</span>
+                        <h4 class="font-montserrat text-[9px] tracking-widest uppercase text-[var(--olive-deep)] mb-3">Escorredor de pratos</h4>
+                        <button onclick="escolher('Escorredor de pratos')" class="text-[var(--olive-main)] border-b border-[var(--olive-main)] pb-1 text-[8px] uppercase tracking-widest">Selecionar</button>
+                    </div>
+                    <div class="gift-card">
+                        <span class="text-2xl mb-3">🍴</span>
+                        <h4 class="font-montserrat text-[9px] tracking-widest uppercase text-[var(--olive-deep)] mb-3">Faqueiro</h4>
+                        <button onclick="escolher('Faqueiro')" class="text-[var(--olive-main)] border-b border-[var(--olive-main)] pb-1 text-[8px] uppercase tracking-widest">Selecionar</button>
+                    </div>
+                    <div class="gift-card">
+                        <span class="text-2xl mb-3">🥤</span>
+                        <h4 class="font-montserrat text-[9px] tracking-widest uppercase text-[var(--olive-deep)] mb-3">Garrafa térmica</h4>
+                        <button onclick="escolher('Garrafa térmica')" class="text-[var(--olive-main)] border-b border-[var(--olive-main)] pb-1 text-[8px] uppercase tracking-widest">Selecionar</button>
+                    </div>
+                    <div class="gift-card">
+                        <span class="text-2xl mb-3">🏺</span>
+                        <h4 class="font-montserrat text-[9px] tracking-widest uppercase text-[var(--olive-deep)] mb-3">Jarra de suco</h4>
+                        <button onclick="escolher('Jarra de suco')" class="text-[var(--olive-main)] border-b border-[var(--olive-main)] pb-1 text-[8px] uppercase tracking-widest">Selecionar</button>
+                    </div>
+                    <div class="gift-card">
+                        <span class="text-2xl mb-3">🍷</span>
+                        <h4 class="font-montserrat text-[9px] tracking-widest uppercase text-[var(--olive-deep)] mb-3">Jogo de taças</h4>
+                        <button onclick="escolher('Jogo de taças')" class="text-[var(--olive-main)] border-b border-[var(--olive-main)] pb-1 text-[8px] uppercase tracking-widest">Selecionar</button>
+                    </div>
+                    <div class="gift-card">
+                        <span class="text-2xl mb-3">🥄</span>
+                        <h4 class="font-montserrat text-[9px] tracking-widest uppercase text-[var(--olive-deep)] mb-3">Kit completo de utensílios</h4>
+                        <button onclick="escolher('Kit completo de utensílios')" class="text-[var(--olive-main)] border-b border-[var(--olive-main)] pb-1 text-[8px] uppercase tracking-widest">Selecionar</button>
+                    </div>
+                    <div class="gift-card">
+                        <span class="text-2xl mb-3">🌪️</span>
+                        <h4 class="font-montserrat text-[9px] tracking-widest uppercase text-[var(--olive-deep)] mb-3">Liquidificador</h4>
+                        <button onclick="escolher('Liquidificador')" class="text-[var(--olive-main)] border-b border-[var(--olive-main)] pb-1 text-[8px] uppercase tracking-widest">Selecionar</button>
+                    </div>
+                    <div class="gift-card">
+                        <span class="text-2xl mb-3">🧹</span>
+                        <h4 class="font-montserrat text-[9px] tracking-widest uppercase text-[var(--olive-deep)] mb-3">Mop giratório</h4>
+                        <button onclick="escolher('Mop giratório')" class="text-[var(--olive-main)] border-b border-[var(--olive-main)] pb-1 text-[8px] uppercase tracking-widest">Selecionar</button>
+                    </div>
+                    <div class="gift-card">
+                        <span class="text-2xl mb-3">🍳</span>
+                        <h4 class="font-montserrat text-[9px] tracking-widest uppercase text-[var(--olive-deep)] mb-3">Kit de panelas</h4>
+                        <button onclick="escolher('Kit de panelas')" class="text-[var(--olive-main)] border-b border-[var(--olive-main)] pb-1 text-[8px] uppercase tracking-widest">Selecionar</button>
+                    </div>
+                    <div class="gift-card">
+                        <span class="text-2xl mb-3">💎</span>
+                        <h4 class="font-montserrat text-[9px] tracking-widest uppercase text-[var(--olive-deep)] mb-3">Kit de pirex</h4>
+                        <button onclick="escolher('Kit de pirex')" class="text-[var(--olive-main)] border-b border-[var(--olive-main)] pb-1 text-[8px] uppercase tracking-widest">Selecionar</button>
+                    </div>
+                    <div class="gift-card">
+                        <span class="text-2xl mb-3">🧀</span>
+                        <h4 class="font-montserrat text-[9px] tracking-widest uppercase text-[var(--olive-deep)] mb-3">Porta frios</h4>
+                        <button onclick="escolher('Porta frios')" class="text-[var(--olive-main)] border-b border-[var(--olive-main)] pb-1 text-[8px] uppercase tracking-widest">Selecionar</button>
+                    </div>
+                    <div class="gift-card">
+                        <span class="text-2xl mb-3">🥣</span>
+                        <h4 class="font-montserrat text-[9px] tracking-widest uppercase text-[var(--olive-deep)] mb-3">Pote cumbuca (6 un)</h4>
+                        <button onclick="escolher('Pote cumbuca (6 unidades)')" class="text-[var(--olive-main)] border-b border-[var(--olive-main)] pb-1 text-[8px] uppercase tracking-widest">Selecionar</button>
                     </div>
                 </div>
             </div>
