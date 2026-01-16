@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chá de Panela | Mayara & Thalify</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Montserrat:wght@200;300;400;500&family=Pinyon+Script&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --olive-deep: #3d4430;
+            --olive-main: #556b2f;
+            --olive-light: #808b6d;
+            --sand: #f2f4ed;
+            --gold-pale: #c5a059;
+            --white-pure: #ffffff;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background-color: var(--sand);
+            color: var(--olive-deep);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .main-content { display: none; }
+
+        .bororo-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l30 30-30 30L0 30z' fill='%23556b2f' fill-opacity='0.04' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+
+        .bororo-border {
+            border: 1px solid rgba(85, 107, 47, 0.2);
+            position: relative;
+        }
+
+        .bororo-border::before {
+            content: '';
+            position: absolute;
+            top: 10px; left: 10px; right: 10px; bottom: 10px;
+            border: 1px solid rgba(85, 107, 47, 0.1);
+            pointer-events: none;
+            border-radius: 40px;
+        }
+
+        .rounded-luxury { border-radius: 50px; }
+        .font-script { font-family: 'Pinyon Script', cursive; }
+        .font-montserrat { font-family: 'Montserrat', sans-serif; }
+
+        .fade-in { animation: fadeIn 1.5s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .btn-luxe {
+            background: var(--olive-main);
+            color: white;
+            padding: 16px 40px;
+            border-radius: 100px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 11px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-block;
+            border: 1px solid var(--olive-main);
+        }
+        .btn-luxe:hover {
+            background: transparent;
+            color: var(--olive-main);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(85, 107, 47, 0.1);
+        }
+
+        #login-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--sand);
+            position: relative;
+            z-index: 1000;
+            padding: 2rem 0;
+        }
+
+        .login-photo-frame {
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 2rem;
+            position: relative;
+            padding: 10px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+            border: 1px solid rgba(85, 107, 47, 0.1);
+        }
+        .login-photo-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .hero-frame {
+            position: relative;
+            padding: 20px;
+            background: white;
+            border-radius: 200px 200px 50px 50px;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.05);
+        }
+
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translate(-50%, 150%);
+            background: var(--olive-deep);
+            color: white;
+            padding: 14px 35px;
+            border-radius: 50px;
+            z-index: 2000;
+            transition: transform 0.5s ease;
+            font-size: 14px;
+        }
+        #toast.show { transform: translate(-50%, 0); }
+
+        @media (min-width: 1024px) {
+            * { cursor: none !important; }
+            #cursor { width: 8px; height: 8px; background: var(--olive-main); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9999; }
+            #follower { width: 35px; height: 35px; border: 1px solid var(--olive-main); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9998; transition: 0.1s; }
+        }
+
+        .map-container {
+            filter: grayscale(1) contrast(1.1) opacity(0.8);
+            transition: all 0.5s ease;
+        }
+        .map-container:hover {
+            filter: grayscale(0.2) contrast(1) opacity(1);
+        }
+    </style>
+</head>
+<body class="bororo-pattern">
+
+    <div id="cursor" class="hidden lg:block"></div>
+    <div id="follower" class="hidden lg:block"></div>
+    <div id="toast">❦</div>
+
+    <!-- TELA DE LOGIN COM FOTO E NOME COMPLETO -->
+    <div id="login-screen" class="fade-in">
+        <div class="max-w-md w-full px-8">
+            <div class="bg-white p-12 rounded-luxury bororo-border text-center shadow-2xl">
+                
+                <div class="login-photo-frame">
+                    <img src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&q=80&w=400" alt="Mayara & Thalify">
+                    <div class="absolute -bottom-2 -right-2 bg-[var(--olive-main)] text-white w-8 h-8 rounded-full flex items-center justify-center text-xs shadow-lg">❦</div>
+                </div>
+
+                <div class="mb-8">
+                    <h2 class="font-montserrat tracking-[0.4em] text-[10px] uppercase text-stone-400 mb-4">Bem-vindo ao encontro de</h2>
+                    <h1 class="font-script text-6xl text-[var(--olive-main)]">Mayara & Thalify</h1>
+                </div>
+                
+                <form id="login-form" class="space-y-8">
+                    <div class="space-y-2">
+                        <input type="text" id="user-name" required placeholder="Seu nome completo" 
+                            class="w-full border-b border-stone-200 py-4 outline-none focus:border-[var(--olive-main)] text-center italic bg-transparent transition-all placeholder:text-stone-300">
+                        <p class="text-[9px] uppercase tracking-widest text-stone-300 font-montserrat">Por favor, utilize o nome completo para a lista</p>
+                    </div>
+                    <button type="submit" class="btn-luxe w-full">Entrar na Experiência</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div id="main-content" class="main-content">
+        
+        <!-- HEADER -->
+        <header id="inicio" class="min-h-screen flex flex-col items-center justify-center pt-24 pb-12 px-6">
+            <div class="max-w-4xl w-full text-center fade-in">
+                <div class="mb-10">
+                    <span class="font-montserrat tracking-[0.8em] text-[11px] uppercase text-[var(--gold-pale)] block mb-6">Convite Especial</span>
+                    <h1 class="text-7xl md:text-9xl font-script text-[var(--olive-deep)] mb-4">Chá de Panela</h1>
+                    <div class="h-[1px] w-20 bg-[var(--olive-main)] mx-auto opacity-30 mb-8"></div>
+                </div>
+
+                <div class="relative inline-block mb-16">
+                    <div class="hero-frame">
+                        <img src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&q=80&w=1200" 
+                             alt="Foto do Casal" class="w-full max-w-lg aspect-[4/5] object-cover rounded-luxury">
+                    </div>
+                    <div class="absolute -top-6 -right-6 text-6xl text-[var(--olive-main)] opacity-20 font-serif">❦</div>
+                    <div class="absolute -bottom-6 -left-6 text-6xl text-[var(--olive-main)] opacity-20 font-serif rotate-180">❦</div>
+                </div>
+
+                <p id="welcome-msg" class="font-serif italic text-3xl text-stone-600 mb-2">Mayara & Thalify</p>
+                <p class="font-montserrat tracking-[0.3em] text-[10px] uppercase text-stone-400">Bragança Paulista • 2026</p>
+            </div>
+        </header>
+
+        <!-- DATA E CONTAGEM REGRESSIVA -->
+        <section class="bg-white py-20 px-6 border-y border-stone-100">
+            <div class="max-w-4xl mx-auto text-center">
+                <h2 class="text-5xl md:text-6xl font-script text-[var(--olive-deep)] mb-8">Data & Horário</h2>
+                <p class="font-serif text-2xl italic text-stone-600 mb-6">Sábado, 15 de Agosto</p>
+                <p class="font-montserrat tracking-[0.4em] text-xs uppercase text-[var(--olive-light)] mb-12">Às 15 horas e 45 minutos</p>
+                
+                <div class="flex justify-center space-x-12">
+                    <div class="text-center">
+                        <span id="days" class="text-5xl font-light text-[var(--olive-main)]">00</span>
+                        <p class="text-[9px] uppercase tracking-widest text-stone-400 mt-2">Dias</p>
+                    </div>
+                    <div class="text-center">
+                        <span id="hours" class="text-5xl font-light text-[var(--olive-main)]">00</span>
+                        <p class="text-[9px] uppercase tracking-widest text-stone-400 mt-2">Horas</p>
+                    </div>
+                    <div class="text-center">
+                        <span id="minutes" class="text-5xl font-light text-[var(--olive-main)]">00</span>
+                        <p class="text-[9px] uppercase tracking-widest text-stone-400 mt-2">Minutos</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- LOCALIZAÇÃO E MAPA -->
+        <section id="localizacao" class="py-32 px-6">
+            <div class="max-w-6xl mx-auto">
+                <div class="bg-white rounded-luxury shadow-2xl overflow-hidden bororo-border">
+                    <div class="flex flex-col md:flex-row">
+                        <div class="w-full md:w-2/5 p-12 md:p-20 flex flex-col justify-center bg-[var(--sand)] relative">
+                            <div class="absolute top-10 left-10 opacity-10 text-[var(--olive-main)]">
+                                <svg width="60" height="60" viewBox="0 0 100 100"><path d="M50 0 L100 50 L50 100 L0 50 Z" fill="currentColor"/></svg>
+                            </div>
+                            
+                            <h3 class="font-montserrat text-[10px] tracking-widest uppercase text-[var(--olive-main)] mb-6">O Local</h3>
+                            <h2 class="text-4xl font-serif mb-6 italic">Espaço Villa Garden</h2>
+                            <p class="text-stone-500 leading-relaxed italic mb-10">
+                                Rua das Azaleias, 450<br>
+                                Jardim das Flores<br>
+                                Bragança Paulista, SP
+                            </p>
+                            
+                            <div class="mt-auto">
+                                <a href="https://maps.app.goo.gl/qL9wD" target="_blank" class="btn-luxe text-center w-full">Abrir no GPS</a>
+                            </div>
+                        </div>
+                        
+                        <div class="w-full md:w-3/5 h-[450px] md:h-auto min-h-[400px] relative">
+                            <div class="map-container w-full h-full">
+                                <iframe 
+                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3674.3218556606015!2d-46.54141682379374!3d-22.938361579234856!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94cec98024982361%3A0xc60c183788879621!2sBragan%C3%A7a%20Paulista%2C%20SP!5e0!3m2!1spt-BR!2sbr!4v1700000000000!5m2!1spt-BR!2sbr" 
+                                    width="100%" 
+                                    height="100%" 
+                                    style="border:0;" 
+                                    allowfullscreen="" 
+                                    loading="lazy" 
+                                    referrerpolicy="no-referrer-when-downgrade">
+                                </iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PRESENTES -->
+        <section id="presentes" class="py-32 px-6">
+            <div class="max-w-6xl mx-auto text-center">
+                <h2 class="font-script text-6xl text-[var(--olive-main)] mb-4">Mimos para nossa Cozinha</h2>
+                <p class="font-serif italic text-stone-500 mb-20">Sua presença é nossa maior alegria. <br> Mas se desejar nos presentear, aqui estão algumas inspirações:</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                    <div class="group">
+                        <div class="aspect-square bg-white rounded-luxury bororo-border flex items-center justify-center p-12 transition-all duration-700 group-hover:shadow-2xl group-hover:-translate-y-4">
+                            <div class="text-center">
+                                <span class="text-4xl block mb-6 grayscale group-hover:grayscale-0 transition-all">🍶</span>
+                                <h4 class="font-montserrat text-[11px] tracking-[0.3em] uppercase mb-4 text-[var(--olive-deep)]">Utensílios Cerâmicos</h4>
+                                <p class="text-stone-400 text-xs italic mb-8">Peças orgânicas e funcionais em tons terra</p>
+                                <button onclick="escolher('Cerâmicas')" class="text-[var(--olive-main)] border-b border-[var(--olive-main)] pb-1 text-[10px] uppercase tracking-widest">Selecionar</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="group">
+                        <div class="aspect-square bg-white rounded-luxury bororo-border flex items-center justify-center p-12 transition-all duration-700 group-hover:shadow-2xl group-hover:-translate-y-4">
+                            <div class="text-center">
+                                <span class="text-4xl block mb-6 grayscale group-hover:grayscale-0 transition-all">🧺</span>
+                                <h4 class="font-montserrat text-[11px] tracking-[0.3em] uppercase mb-4 text-[var(--olive-deep)]">Têxteis & Linho</h4>
+                                <p class="text-stone-400 text-xs italic mb-8">Toalhas e caminhos de mesa de fibra natural</p>
+                                <button onclick="escolher('Têxteis')" class="text-[var(--olive-main)] border-b border-[var(--olive-main)] pb-1 text-[10px] uppercase tracking-widest">Selecionar</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="group">
+                        <div class="aspect-square bg-white rounded-luxury bororo-border flex items-center justify-center p-12 transition-all duration-700 group-hover:shadow-2xl group-hover:-translate-y-4">
+                            <div class="text-center">
+                                <span class="text-4xl block mb-6 grayscale group-hover:grayscale-0 transition-all">🔪</span>
+                                <h4 class="font-montserrat text-[11px] tracking-[0.3em] uppercase mb-4 text-[var(--olive-deep)]">Cutelaria & Aço</h4>
+                                <p class="text-stone-400 text-xs italic mb-8">Facas e acessórios de alta qualidade</p>
+                                <button onclick="escolher('Cutelaria')" class="text-[var(--olive-main)] border-b border-[var(--olive-main)] pb-1 text-[10px] uppercase tracking-widest">Selecionar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RSVP -->
+        <section id="rsvp" class="min-h-screen flex items-center justify-center px-6">
+            <div class="max-w-2xl w-full bg-white p-12 md:p-20 rounded-luxury shadow-xl text-center relative overflow-hidden">
+                <div class="absolute -top-10 -right-10 w-32 h-32 bg-[var(--sand)] rounded-full opacity-50"></div>
+                
+                <div class="mb-12">
+                    <h2 class="font-script text-6xl text-[var(--olive-deep)] mb-4">Confirmação</h2>
+                    <p class="font-serif italic text-stone-400">Seria uma honra ter você conosco neste dia.</p>
+                </div>
+
+                <form id="rsvp-form" class="space-y-12">
+                    <div class="space-y-8">
+                        <input type="text" id="rsvp-name" required placeholder="Nome e Sobrenome" 
+                            class="w-full border-b border-stone-200 py-4 outline-none focus:border-[var(--olive-main)] text-center italic bg-transparent transition-all">
+                        
+                        <div class="flex items-center justify-center space-x-6">
+                            <span class="text-[10px] uppercase tracking-widest text-stone-400">Total de Pessoas:</span>
+                            <input type="number" id="rsvp-guests" required min="1" value="1" 
+                                class="w-20 border-b border-stone-200 py-2 outline-none focus:border-[var(--olive-main)] text-center bg-transparent">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-luxe w-full">Confirmar Presença ❦</button>
+                </form>
+
+                <div id="admin-panel" class="mt-16 pt-8 border-t border-stone-100 hidden">
+                    <p class="font-montserrat text-[9px] tracking-widest uppercase text-stone-400 mb-6">Lista de Presenças</p>
+                    <div id="guest-list" class="text-xs text-stone-400 italic space-y-2 mb-6"></div>
+                    <p id="guest-total" class="font-montserrat text-[11px] text-[var(--olive-main)] font-medium"></p>
+                </div>
+            </div>
+        </section>
+
+        <footer class="py-20 text-center opacity-30">
+            <p class="font-script text-3xl mb-4">Mayara & Thalify</p>
+            <p class="font-montserrat text-[8px] tracking-[0.5em] uppercase text-[var(--olive-deep)]">M&T • 2026</p>
+        </footer>
+    </div>
+
+    <script>
+        const WHATSAPP = "5511978260711"; 
+
+        const loginForm = document.getElementById('login-form');
+        const loginScreen = document.getElementById('login-screen');
+        const mainContent = document.getElementById('main-content');
+        const rsvpForm = document.getElementById('rsvp-form');
+        const welcome = document.getElementById('welcome-msg');
+
+        const cursor = document.getElementById('cursor');
+        const follower = document.getElementById('follower');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            follower.style.left = (e.clientX - 17) + 'px';
+            follower.style.top = (e.clientY - 17) + 'px';
+        });
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const fullName = document.getElementById('user-name').value;
+            const firstName = fullName.split(' ')[0];
+            
+            welcome.innerText = firstName + ', seja bem-vindo(a).';
+            document.getElementById('rsvp-name').value = fullName;
+            
+            loginScreen.style.opacity = '0';
+            setTimeout(() => {
+                loginScreen.style.display = 'none';
+                mainContent.style.display = 'block';
+                updateCountdown();
+                renderGuests();
+            }, 800);
+        });
+
+        rsvpForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nome = document.getElementById('rsvp-name').value;
+            const qtd = document.getElementById('rsvp-guests').value;
+
+            const convidados = JSON.parse(localStorage.getItem('rsvp_olive_luxe') || '[]');
+            convidados.push({ nome, qtd: parseInt(qtd) });
+            localStorage.setItem('rsvp_olive_luxe', JSON.stringify(convidados));
+
+            const msg = `Olá Mayara e Thalify! ❦\n\nConfirmo minha presença no Chá de Panela!\n\nNome: ${nome}\nTotal de pessoas: ${qtd}\n\nEstamos muito felizes por vocês!`;
+            const url = `https://api.whatsapp.com/send?phone=${WHATSAPP}&text=${encodeURIComponent(msg)}`;
+            
+            showToast('A abrir o WhatsApp... ❦');
+            renderGuests();
+            setTimeout(() => window.open(url, '_blank'), 1500);
+        });
+
+        function renderGuests() {
+            const list = JSON.parse(localStorage.getItem('rsvp_olive_luxe') || '[]');
+            const container = document.getElementById('guest-list');
+            const totalDisplay = document.getElementById('guest-total');
+            const admin = document.getElementById('admin-panel');
+
+            if(list.length > 0) {
+                admin.classList.remove('hidden');
+                container.innerHTML = list.map(c => `<div>${c.nome} (Grupo de ${c.qtd})</div>`).join('');
+                const sum = list.reduce((a, b) => a + b.qtd, 0);
+                totalDisplay.innerText = `Total Confirmado: ${sum} pessoas`;
+            }
+        }
+
+        function escolher(item) {
+            showToast(`Sugestão anotada: ${item} ❦`);
+        }
+
+        const target = new Date("Aug 15, 2026 15:45:00").getTime();
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const d = target - now;
+            if(d > 0) {
+                document.getElementById("days").innerText = Math.floor(d / (86400000)).toString().padStart(2, '0');
+                document.getElementById("hours").innerText = Math.floor((d % 86400000) / 3600000).toString().padStart(2, '0');
+                document.getElementById("minutes").innerText = Math.floor((d % 3600000) / 60000).toString().padStart(2, '0');
+            }
+        }
+        setInterval(updateCountdown, 1000);
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+    </script>
+</body>
+</html>
