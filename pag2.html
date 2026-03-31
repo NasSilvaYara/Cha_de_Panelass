@@ -1,0 +1,351 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { initializeApp } from 'firebase/app';
+import { 
+  getFirestore, 
+  collection, 
+  doc, 
+  onSnapshot, 
+  updateDoc, 
+  setDoc,
+  getDoc
+} from 'firebase/firestore';
+import { 
+  getAuth, 
+  signInAnonymously, 
+  onAuthStateChanged,
+  signInWithCustomToken
+} from 'firebase/auth';
+import { Gift, CheckCircle, Lock, ShoppingBag, X, Loader2, ChevronLeft, Heart, Search } from 'lucide-react';
+
+// --- CONFIGURAÇÃO E CONSTANTES ---
+const firebaseConfig = JSON.parse(__firebase_config);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'cha-de-panela-oliva';
+
+const CATEGORIES = ["Cozinha", "Mesa e Banho", "Eletros", "Decoração", "Lavanderia"];
+
+const INITIAL_GIFTS = [
+  { id: '1', name: 'Jogo de Panelas Antiaderentes', category: 'Cozinha', image: 'https://images.unsplash.com/photo-1584990344610-52ec10198b15?w=500&q=80' },
+  { id: '2', name: 'Escorredor de Louça Inox', category: 'Cozinha', image: 'https://images.unsplash.com/photo-1584622781564-1d9876a13d00?w=500&q=80' },
+  { id: '3', name: 'Conjunto de Facas Profissionais', category: 'Cozinha', image: 'https://images.unsplash.com/photo-1593611664164-5d44730c59f7?w=500&q=80' },
+  { id: '4', name: 'Aparelho de Jantar (42 peças)', category: 'Mesa e Banho', image: 'https://images.unsplash.com/photo-1574362848149-11496d93a7c7?w=500&q=80' },
+  { id: '5', name: 'Jogo de Toalhas Algodão', category: 'Mesa e Banho', image: 'https://images.unsplash.com/photo-1583947581924-860bda6a26df?w=500&q=80' },
+  { id: '6', name: 'Liquidificador Turbo', category: 'Eletros', image: 'https://images.unsplash.com/photo-1570222094114-d054a817e56b?w=500&q=80' },
+  { id: '7', name: 'Batedeira Planetária', category: 'Eletros', image: 'https://images.unsplash.com/photo-1594385208974-2e75f9d8ad48?w=500&q=80' },
+  { id: '8', name: 'Quadro Decorativo Botânico', category: 'Decoração', image: 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=500&q=80' },
+  { id: '9', name: 'Vaso de Cerâmica Oliva', category: 'Decoração', image: 'https://images.unsplash.com/photo-1578500484748-482087563063?w=500&q=80' },
+  { id: '10', name: 'Cesto de Roupas Boho', category: 'Lavanderia', image: 'https://images.unsplash.com/photo-1591123120675-6f7f1aae0e5b?w=500&q=80' },
+  { id: '11', name: 'Tábua de Passar Luxo', category: 'Lavanderia', image: 'https://images.unsplash.com/photo-1520333789090-1afc82db536a?w=500&q=80' },
+  { id: '12', name: 'Kit Potes Herméticos', category: 'Cozinha', image: 'https://images.unsplash.com/photo-1590794056226-79ef3a8147e1?w=500&q=80' },
+];
+
+export default function App() {
+  // --- ESTADO (Lógica/JS) ---
+  const [user, setUser] = useState(null);
+  const [userName, setUserName] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [gifts, setGifts] = useState([]);
+  const [activeCategory, setActiveCategory] = useState('Todos');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [message, setMessage] = useState({ text: '', type: '' });
+  const [loading, setLoading] = useState(true);
+
+  // --- EFEITOS (Lógica/JS) ---
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+      } catch (err) { console.error(err); }
+    };
+    initAuth();
+    const unsubscribe = onAuthStateChanged(auth, (currUser) => {
+      setUser(currUser);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const giftsRef = collection(db, 'artifacts', appId, 'public', 'data', 'giftList');
+    const unsubscribe = onSnapshot(giftsRef, (snapshot) => {
+      if (snapshot.empty) {
+        INITIAL_GIFTS.forEach(async (item) => {
+          const itemRef = doc(db, 'artifacts', appId, 'public', 'data', 'giftList', item.id);
+          await setDoc(itemRef, { ...item, reservedBy: null, reservedByName: '' }, { merge: true });
+        });
+      } else {
+        const giftsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setGifts(giftsData);
+      }
+    });
+    return () => unsubscribe();
+  }, [user]);
+
+  // --- HANDLERS (Lógica/JS) ---
+  const showNotification = (text, type = 'success') => {
+    setMessage({ text, type });
+    setTimeout(() => setMessage({ text: '', type: '' }), 3000);
+  };
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (userName.trim().length > 2) {
+      setIsAuthenticated(true);
+      showNotification(`Bem-vinda(o), ${userName}!`);
+    }
+  };
+
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      showNotification("Você já está na página principal.", "info");
+    }
+  };
+
+  const toggleGift = async (gift) => {
+    if (!user) return;
+    const giftRef = doc(db, 'artifacts', appId, 'public', 'data', 'giftList', gift.id);
+    const docSnap = await getDoc(giftRef);
+    const currentData = docSnap.data();
+
+    if (currentData?.reservedBy && currentData.reservedBy !== user.uid) {
+      showNotification("Este item já foi escolhido por outra pessoa.", "error");
+      return;
+    }
+
+    const isReserving = !currentData?.reservedBy;
+    try {
+      await updateDoc(giftRef, {
+        reservedBy: isReserving ? user.uid : null,
+        reservedByName: isReserving ? userName : ''
+      });
+      showNotification(
+        isReserving ? `Você escolheu: ${gift.name}` : `Reserva removida`,
+        isReserving ? 'success' : 'info'
+      );
+    } catch (err) {
+      showNotification("Ocorreu um erro. Tente novamente.", "error");
+    }
+  };
+
+  const filteredGifts = useMemo(() => {
+    const list = gifts.length > 0 ? gifts : INITIAL_GIFTS.map(g => ({ ...g, reservedBy: null, reservedByName: '' }));
+    return list.filter(g => {
+      const matchesCategory = activeCategory === 'Todos' || g.category === activeCategory;
+      const matchesSearch = g.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                           g.category.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
+    });
+  }, [gifts, activeCategory, searchQuery]);
+
+  // --- ESTILOS (CSS via Tailwind) ---
+  const styles = {
+    container: "min-h-screen bg-[#FDFCF8] font-sans text-[#2D3322]",
+    card: "bg-white rounded-3xl shadow-xl overflow-hidden border border-[#E8E6D9]",
+    buttonOlive: "bg-[#556B2F] hover:bg-[#445626] text-white font-bold py-4 rounded-xl transition-all tracking-widest uppercase text-xs shadow-lg",
+    nav: "bg-white/90 backdrop-blur-md border-b border-[#E8E6D9] sticky top-0 z-30",
+    input: "w-full px-5 py-4 rounded-xl bg-[#F4F2E9] border-transparent focus:ring-2 focus:ring-[#556B2F]/20 outline-none transition-all text-[#2D3322]",
+    badge: "px-6 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border",
+    notification: "fixed bottom-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-2xl shadow-2xl text-white text-[10px] font-bold uppercase tracking-widest z-50 flex items-center gap-3 transition-all animate-in fade-in slide-in-from-bottom-5"
+  };
+
+  // --- RENDER (Estrutura/HTML/JSX) ---
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#FDFCF8] flex items-center justify-center">
+        <Loader2 className="animate-spin text-[#556B2F] w-12 h-12" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#FDFCF8] flex items-center justify-center p-6">
+        <div className={`max-w-md w-full ${styles.card}`}>
+          <div className="bg-[#556B2F] p-10 text-center text-white">
+            <Heart className="mx-auto mb-4 fill-white" size={32} />
+            <h1 className="text-3xl font-serif italic tracking-wide">Lista de Presentes</h1>
+            <p className="text-white/80 text-xs mt-2 uppercase tracking-[0.2em]">Chá de Panela Verde Oliva</p>
+          </div>
+          <div className="p-8 text-center">
+            <p className="text-[#556B2F] text-sm mb-8 leading-relaxed italic">
+              "Para acessar nossa lista, por favor identifique-se com o <strong>mesmo nome</strong> utilizado na confirmação de presença."
+            </p>
+            <form onSubmit={handleLogin} className="space-y-6">
+              <div className="text-left">
+                <label className="text-[10px] uppercase tracking-widest text-[#556B2F] font-bold ml-1 mb-2 block">Nome Completo</label>
+                <input 
+                  type="text" 
+                  placeholder="Nome e Sobrenome" 
+                  className={styles.input}
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
+                  required
+                />
+              </div>
+              <button type="submit" className={styles.buttonOlive}>
+                Entrar na Lista
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.container + " pb-20"}>
+      {/* Navegação Superior */}
+      <nav className={styles.nav}>
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <button 
+            onClick={handleBack} 
+            className="flex items-center gap-2 text-[#556B2F] hover:opacity-70 transition-all text-xs font-bold uppercase tracking-widest"
+          >
+            <ChevronLeft size={16} /> Voltar ao Convite
+          </button>
+          <div className="hidden md:block font-serif italic text-2xl text-[#556B2F]">Nossa Casa</div>
+          <div className="flex items-center gap-3 bg-[#F4F2E9] px-4 py-2 rounded-full border border-[#E8E6D9]">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#556B2F]">{userName}</span>
+          </div>
+        </div>
+      </nav>
+
+      <main className="max-w-7xl mx-auto px-6 py-12">
+        {/* Cabeçalho de Conteúdo */}
+        <header className="mb-12 text-center max-w-3xl mx-auto">
+          <Gift className="text-[#556B2F] mx-auto mb-4 opacity-40" size={40} />
+          <h2 className="text-4xl md:text-5xl font-serif italic text-[#556B2F] mb-6">Sugestões de Presentes</h2>
+          
+          <div className="relative max-w-xl mx-auto mb-8">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-[#556B2F]/40" size={20} />
+            <input 
+              type="text"
+              placeholder="Buscar por item ou categoria..."
+              className="w-full pl-14 pr-6 py-4 rounded-2xl bg-white border border-[#E8E6D9] focus:ring-2 focus:ring-[#556B2F]/10 outline-none transition-all shadow-sm"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
+          <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar justify-start md:justify-center">
+            <button 
+              onClick={() => setActiveCategory('Todos')}
+              className={`${styles.badge} ${activeCategory === 'Todos' ? 'bg-[#556B2F] text-white border-[#556B2F]' : 'bg-white text-[#556B2F] border-[#E8E6D9]'}`}
+            >
+              Todos
+            </button>
+            {CATEGORIES.map(cat => (
+              <button 
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={`${styles.badge} ${activeCategory === cat ? 'bg-[#556B2F] text-white border-[#556B2F]' : 'bg-white text-[#556B2F] border-[#E8E6D9]'}`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </header>
+
+        {/* Grade de Itens */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filteredGifts.map(gift => {
+            const isReservedByMe = gift.reservedBy === user?.uid;
+            const isReservedByOthers = gift.reservedBy && !isReservedByMe;
+
+            return (
+              <div 
+                key={gift.id}
+                className={`group bg-white rounded-2xl overflow-hidden transition-all duration-500 border ${
+                  isReservedByMe ? 'border-[#556B2F] ring-1 ring-[#556B2F]/20 shadow-lg' : 
+                  isReservedByOthers ? 'border-transparent opacity-60' : 'border-[#E8E6D9] hover:shadow-xl'
+                }`}
+              >
+                {/* Imagem (Parte da Estrutura) */}
+                <div className="h-48 w-full overflow-hidden relative bg-[#F4F2E9]">
+                  <img 
+                    src={gift.image || 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=500&q=80'} 
+                    alt={gift.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=500&q=80' }}
+                  />
+                  {isReservedByOthers && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                      <span className="text-white text-[10px] font-bold uppercase tracking-[0.2em] border border-white/40 px-4 py-2 rounded-lg backdrop-blur-sm">
+                        Já Escolhido
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="p-6 flex flex-col h-auto">
+                  <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#556B2F]/60 mb-2">
+                    {gift.category}
+                  </span>
+                  
+                  <h3 className="text-lg font-serif text-[#2D3322] mb-4 leading-snug min-h-[3rem]">
+                    {gift.name}
+                  </h3>
+
+                  <div className="flex items-center gap-2 mb-6">
+                    <div className={`w-1.5 h-1.5 rounded-full ${isReservedByOthers ? 'bg-gray-400' : isReservedByMe ? 'bg-[#556B2F]' : 'bg-green-500 animate-pulse'}`}></div>
+                    <p className="text-[10px] uppercase tracking-widest font-bold text-[#5C4D4D]/60">
+                      {isReservedByOthers ? `Por ${gift.reservedByName}` : isReservedByMe ? 'Sua escolha' : 'Disponível'}
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => toggleGift(gift)}
+                    disabled={isReservedByOthers}
+                    className={`w-full py-4 rounded-xl font-bold text-[9px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 ${
+                      isReservedByMe 
+                      ? 'bg-transparent border border-[#556B2F] text-[#556B2F] hover:bg-[#556B2F]/5' 
+                      : isReservedByOthers 
+                      ? 'bg-gray-100 text-gray-400 border-transparent cursor-not-allowed' 
+                      : 'bg-[#556B2F] text-white border-[#556B2F] hover:shadow-lg hover:bg-[#445626]'
+                    }`}
+                  >
+                    {isReservedByMe ? (
+                      <> <X size={14} /> Cancelar </>
+                    ) : isReservedByOthers ? (
+                      <> <Lock size={14} /> Indisponível </>
+                    ) : (
+                      <> <ShoppingBag size={14} /> Eu vou dar este </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {filteredGifts.length === 0 && (
+          <div className="text-center py-32 bg-white rounded-3xl border border-dashed border-[#E8E6D9]">
+            <p className="text-[#556B2F]/60 italic font-serif">Não encontramos itens com esse nome...</p>
+          </div>
+        )}
+      </main>
+
+      <footer className="mt-12 py-12 text-center">
+        <div className="w-12 h-px bg-[#556B2F] mx-auto mb-6 opacity-20"></div>
+        <p className="font-serif italic text-[#556B2F] text-lg">Com amor, Noivos</p>
+      </footer>
+
+      {/* Alerta (CSS condicional) */}
+      {message.text && (
+        <div className={`${styles.notification} ${message.type === 'error' ? 'bg-red-800' : 'bg-[#2D3322]'}`}>
+          {message.text}
+        </div>
+      )}
+    </div>
+  );
+}
